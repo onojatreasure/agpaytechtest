@@ -12,4 +12,6 @@ public interface CountriesService {
     List<Countries> getAllCountries();
 
     Page<Countries> getAllCountries(Pageable p);
+
+    List findAll(String partialTitle);
 }
