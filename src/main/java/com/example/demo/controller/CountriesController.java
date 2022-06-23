@@ -1,6 +1,10 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.CreateCountryRequest;
+import com.example.demo.dto.response.GenericResponse;
 import com.example.demo.entities.Countries;
+import com.example.demo.enums.StatusCodes;
+import com.example.demo.enums.StatusDescription;
 import com.example.demo.service.CountriesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,6 +25,9 @@ public class CountriesController {
     @Autowired
     private CountriesService countriesService;
 
+    @Autowired
+    GenericResponse genericResponse;
+
     Logger logger = LoggerFactory.getLogger(CountriesController.class);
 
 //    @GetMapping(value = "/get-all-countries", params = {"page", "size"})
@@ -31,7 +36,7 @@ public class CountriesController {
 //        return countriesService.getAllCountries(p);
 //    }
 
-    @GetMapping(value = "/get-all-countries-http", params = {"page", "size"})
+    @GetMapping(value = "/get-all-countries", params = {"page", "size"})
     public ResponseEntity<Countries> getAllCountries(Pageable p) {
         logger.info("getting all countries...");
         Object testCountries = countriesService.getAllCountries(p);
@@ -43,6 +48,18 @@ public class CountriesController {
         if (StringUtils.hasText(partialTitle)) {
             return ResponseEntity.status(HttpStatus.OK).body(countriesService.findAll(partialTitle));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(this.countriesService.findAll(partialTitle));
+        return ResponseEntity.status(HttpStatus.OK).body(countriesService.getAllCountries());
+    }
+
+    @PostMapping("/create-country")
+    public ResponseEntity<Object> createUser(@RequestBody CreateCountryRequest request) {
+        genericResponse = countriesService.createCountry(request);
+        if (genericResponse.getStatusDescription() == StatusDescription.SUCCESS) {
+            logger.info("country created..");
+            return new ResponseEntity(genericResponse, HttpStatus.CREATED);
+        } else {
+            logger.info("country creation failed..");
+            return new ResponseEntity(genericResponse, HttpStatus.BAD_REQUEST);
+        }
     }
 }
