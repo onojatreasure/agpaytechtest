@@ -16,7 +16,8 @@ public interface CountryRepository extends JpaRepository<Countries, Long> {
     List<Countries> getAllCountries();
 
     //USING postgres Fuzzy operator
-    @Query(value = "SELECT * FROM countries c WHERE ?1 % ANY(STRING_TO_ARRAY(c.name, ' '))", nativeQuery = true)
+    //@Query(value = "SELECT * FROM countries c WHERE ?1 % ANY(STRING_TO_ARRAY(c.name, ' '))", nativeQuery = true)
+    @Query(value ="SELECT * FROM countries c WHERE SIMILARITY(c.name, ?1) > 0.1", nativeQuery = true)
     List<Countries> findAllMatching(String partialTitle);
 
     //check if country already exists
