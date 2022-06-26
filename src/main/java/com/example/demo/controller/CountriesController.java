@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class CountriesController {
@@ -36,11 +37,20 @@ public class CountriesController {
 //        return countriesService.getAllCountries(p);
 //    }
 
-    @GetMapping(value = "/get-all-countries", params = {"page", "size"})
-    public ResponseEntity<Countries> getAllCountries(Pageable p) {
+    @GetMapping(value = "/get-all-countries", params = {"page" , "size"})
+    public ResponseEntity<Object> getAllCountries(Pageable p) {
         logger.info("getting all countries...");
-        Object testCountries = countriesService.getAllCountries(p);
-        return new ResponseEntity(testCountries, HttpStatus.OK);
+        GenericResponse genericResponse = new GenericResponse<>();
+         Object countries = countriesService.getAllCountries(p);
+         //Check if countries is not empty. Return success mage if coumtry is not empty
+         if (Objects.nonNull(countries)){
+             genericResponse =  new GenericResponse(200, StatusDescription.SUCCESS, "Successfully gotten countries", countries);
+         } else {
+             //Return failed message to client
+             genericResponse = new GenericResponse(400, StatusDescription.FAILED, "Invalid Request", countries);
+         }
+
+        return new ResponseEntity(genericResponse, HttpStatus.OK);
     }
 
     @GetMapping(value = "/search",produces = MediaType.APPLICATION_JSON_VALUE)
